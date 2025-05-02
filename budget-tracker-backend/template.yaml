@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Budget Tracker backend using AWS SAM
+
+Globals:
+  Function:
+    Timeout: 5
+    Runtime: nodejs18.x
+    MemorySize: 128
+
+Resources:
+  BudgetFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.handler
+      CodeUri: budget-handler/
+      Events:
+        BudgetApi:
+          Type: Api
+          Properties:
+            Path: /budget
+            Method: ANY
+      Environment:
+        Variables:
+          TABLE_NAME: BudgetTable
+
+  BudgetTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: BudgetTable
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
