@@ -22,7 +22,14 @@ Resources:
             Method: ANY
       Environment:
         Variables:
-          TABLE_NAME: BudgetTable
+          BUDGET_TABLE: BudgetTable # DynamoDB table name
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:PutItem
+                - dynamodb:Scan
+              Resource: !GetAtt BudgetTable.Arn
 
   BudgetTable:
     Type: AWS::DynamoDB::Table
@@ -35,3 +42,8 @@ Resources:
       KeySchema:
         - AttributeName: id
           KeyType: HASH
+
+Outputs:
+  ApiUrl:
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"

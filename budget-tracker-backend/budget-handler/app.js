@@ -1,5 +1,6 @@
 const AWS = require("aws-sdk");
 const { v4: uuidv4 } = require("uuid");
+//comment: This is a simple AWS Lambda function to handle budget items
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const TABLE_NAME = process.env.BUDGET_TABLE;
