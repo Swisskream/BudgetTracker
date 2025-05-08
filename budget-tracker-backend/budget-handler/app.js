@@ -1,53 +1,86 @@
-const AWS = require("aws-sdk");
-const { v4: uuidv4 } = require("uuid");
-//comment: This is a simple AWS Lambda function to handle budget items
+const AWS = require('aws-sdk');
+const dynamodb = new AWS.DynamoDB.DocumentClient();
+const tableName = process.env.BUDGET_TABLE;
 
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
-const TABLE_NAME = process.env.BUDGET_TABLE;
+exports.lambdaHandler = async (event) => {
+  console.info('Received event:', JSON.stringify(event));
 
-exports.handler = async (event) => {
-  const method = event.httpMethod;
+  const method = event.requestContext?.http?.method;
 
-  if (method === "POST") {
-    const { name, amount, category } = JSON.parse(event.body);
+  try {
+    if (method === 'GET') {
+      const data = await dynamodb.scan({ TableName: tableName }).promise();
 
-    const item = {
-      id: uuidv4(),
-      name,
-      amount,
-      category,
-      date: new Date().toISOString(),
-    };
+      const validItems = (data.Items || []).filter(item =>
+        item &&
+        typeof item.amount === 'number' &&
+        typeof item.description === 'string' &&
+        typeof item.date === 'string'
+      );
 
-    await dynamoDb
-      .put({
-        TableName: TABLE_NAME,
+      return {
+        statusCode: 200,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify(data.Items),
+      };
+    }
+
+    if (method === 'POST') {
+      const body = JSON.parse(event.body);
+      const { description, amount, date } = body;
+
+      if (
+        typeof description !== 'string' ||
+        typeof amount !== 'number' ||
+        typeof date !== 'string'
+      ) {
+        return {
+          statusCode: 400,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+          },
+          body: JSON.stringify({ message: 'Invalid request: description (string), amount (number), and date (string) are required.' }),
+        };
+      }
+
+      const item = {
+        id: Date.now().toString(),
+        description: body.description,
+        amount: body.amount,
+        date: body.date,
+      };
+
+      await dynamodb.put({
+        TableName: tableName,
         Item: item,
-      })
-      .promise();
+      }).promise();
+
+      return {
+        statusCode: 200,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify(validItems),
+      };
+    }
 
     return {
-      statusCode: 200,
-      body: JSON.stringify({ message: "Budget item saved", item }),
+      statusCode: 405,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
+      body: JSON.stringify({ message: 'Method Not Allowed!' }),
     };
-  }
-
-  if (method === "GET") {
-    const result = await dynamoDb
-      .scan({
-        TableName: TABLE_NAME,
-      })
-      .promise();
-
+  } catch (err) {
+    console.error(err);
     return {
-      statusCode: 200,
-      body: JSON.stringify(result.Items),
+      statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
+      body: JSON.stringify({ message: 'Server error', error: err.message }),
     };
   }
-
-  return {
-    statusCode: 400,
-    body: JSON.stringify({ message: "Unsupported method" }),
-  };
 };
-

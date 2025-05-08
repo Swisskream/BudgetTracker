@@ -1,0 +1,5 @@
+{
+    "httpMethod": "POST",
+    "body": "{\"name\": \"Test Income\", \"amount\": 1200}"
+}
+  

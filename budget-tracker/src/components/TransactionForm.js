@@ -2,19 +2,20 @@ import { useState } from 'react';
 import styles from './TransactionForm.module.css';
 
 function TransactionForm({ onAdd }) {
-  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
+  const [date, setDate] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!name || !amount) return;
     onAdd({
-      id: Date.now(),
-      name,
+      description,
       amount: parseFloat(amount),
+      date,
     });
-    setName('');
+    setDescription('');
     setAmount('');
+    setDate('');
   };
 
   return (
@@ -23,14 +24,19 @@ function TransactionForm({ onAdd }) {
         <input
           type="text"
           placeholder="Description"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
         />
         <input
           type="number"
           placeholder="Amount"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
+        />
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
         />
       </div>
       <button type="submit">Add Transaction</button>

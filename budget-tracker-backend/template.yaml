@@ -7,22 +7,31 @@ Globals:
     Timeout: 5
     Runtime: nodejs18.x
     MemorySize: 128
+    Timeout: 10
 
 Resources:
   BudgetFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: app.handler
+      Handler: app.lambdaHandler
       CodeUri: budget-handler/
+      Runtime: nodejs18.x
       Events:
-        BudgetApi:
+        BudgetApiGet:
           Type: Api
           Properties:
+            #RestApiId: !Ref BudgetApi
             Path: /budget
-            Method: ANY
+            Method: GET
+        PostBudgetPost:
+          Type: Api
+          Properties:
+            #RestApiId: !Ref BudgetApi
+            Path: /budget
+            Method: POST
       Environment:
         Variables:
-          BUDGET_TABLE: BudgetTable # DynamoDB table name
+          BUDGET_TABLE: !Ref BudgetTable  # This will inject DynamoDB table name
       Policies:
         - Statement:
             - Effect: Allow
@@ -43,7 +52,20 @@ Resources:
         - AttributeName: id
           KeyType: HASH
 
-Outputs:
-  ApiUrl:
-    Description: "API Gateway endpoint URL for Prod stage"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  #BudgetApi:
+   #Type: AWS::Serverless::Api
+    #Properties:
+      #StageName: Prod
+      #Cors:
+        #AllowMethods: "'GET,POST,OPTIONS'"
+        #AllowHeaders: "'Content-Type'"
+        #AllowOrigin: "'*'"
+        
+
+
+#Outputs:
+  #ApiUrl:
+    #Description: "API Gateway endpoint URL for Prod stage"
+    #Value: !Sub "https://${BudgetApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/budget"
+
+#most recent URL: 5/7/25 -  https://v1ol0vqdn9.execute-api.us-west-1.amazonaws.com/Prod/budget
