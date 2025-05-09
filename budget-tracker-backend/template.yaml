@@ -1,71 +1,53 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Budget Tracker backend using AWS SAM
+Description: Budget Tracker Backend with DynamoDB and CORS
 
 Globals:
   Function:
-    Timeout: 5
-    Runtime: nodejs18.x
-    MemorySize: 128
     Timeout: 10
 
 Resources:
+  BudgetApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Cors:
+        AllowMethods: "'OPTIONS,GET,POST'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: "'*'"
+
   BudgetFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: app.lambdaHandler
-      CodeUri: budget-handler/
       Runtime: nodejs18.x
+      CodeUri: .
       Events:
-        BudgetApiGet:
+        Budget:
           Type: Api
           Properties:
-            #RestApiId: !Ref BudgetApi
             Path: /budget
-            Method: GET
-        PostBudgetPost:
-          Type: Api
-          Properties:
-            #RestApiId: !Ref BudgetApi
-            Path: /budget
-            Method: POST
+            Method: ANY
+            RestApiId: !Ref BudgetApi
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: BudgetTable
       Environment:
         Variables:
-          BUDGET_TABLE: !Ref BudgetTable  # This will inject DynamoDB table name
-      Policies:
-        - Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:PutItem
-                - dynamodb:Scan
-              Resource: !GetAtt BudgetTable.Arn
+          TABLE_NAME: BudgetTable
 
   BudgetTable:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: BudgetTable
-      BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         - AttributeName: id
           AttributeType: S
       KeySchema:
         - AttributeName: id
           KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
 
-  #BudgetApi:
-   #Type: AWS::Serverless::Api
-    #Properties:
-      #StageName: Prod
-      #Cors:
-        #AllowMethods: "'GET,POST,OPTIONS'"
-        #AllowHeaders: "'Content-Type'"
-        #AllowOrigin: "'*'"
-        
-
-
-#Outputs:
-  #ApiUrl:
-    #Description: "API Gateway endpoint URL for Prod stage"
-    #Value: !Sub "https://${BudgetApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/budget"
-
-#most recent URL: 5/7/25 -  https://v1ol0vqdn9.execute-api.us-west-1.amazonaws.com/Prod/budget
+# https://mg1qx9xf93.execute-api.us-west-1.amazonaws.com/Prod/budget
