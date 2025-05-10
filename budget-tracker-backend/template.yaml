@@ -5,6 +5,8 @@ Description: Budget Tracker Backend with DynamoDB and CORS
 Globals:
   Function:
     Timeout: 10
+    MemorySize: 128
+    Timeout: 10
 
 Resources:
   BudgetApi:
@@ -49,5 +51,16 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
+
+  Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - app.js
+        External:
+          - aws-sdk
 
 # https://mg1qx9xf93.execute-api.us-west-1.amazonaws.com/Prod/budget
