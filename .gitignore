@@ -29,13 +29,13 @@ node_modules/
 *.log
 *.zip
 
-# === React Frontend (budget-tracker) ===
-budget-tracker/node_modules/
-budget-tracker/build/
-budget-tracker/.env.local
-budget-tracker/.env.development.local
-budget-tracker/.env.test.local
-budget-tracker/.env.production.local
+# === React Frontend (jkbudgettracker) ===
+jkbudgettracker/node_modules/
+jkbudgettracker/build/
+jkbudgettracker/.env.local
+jkbudgettracker/.env.development.local
+jkbudgettracker/.env.test.local
+jkbudgettracker/.env.production.local
 
 # === Terraform Backend (budget-backend) ===
 budget-backend/.terraform/

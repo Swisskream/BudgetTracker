@@ -2,8 +2,6 @@
 
 A full-stack personal finance tracker built with **React** (frontend) and **AWS Lambda + DynamoDB** (backend), deployed via **Terraform**.
 
-![![alt text](BT_example.png)]
-
 ---
 
 ## 🚀 Features
@@ -14,3 +12,5 @@ A full-stack personal finance tracker built with **React** (frontend) and **AWS 
 - Infrastructure-as-Code using Terraform
 - CORS-enabled HTTP API via API Gateway
 - Clean, responsive frontend using React
+
+![![alt text](BT_example.png)]
