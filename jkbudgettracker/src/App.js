@@ -9,7 +9,7 @@ function App() {
 
   // ✅ Fetch data on component mount
   useEffect(() => {
-    fetch('https://rv96je8k26.execute-api.us-west-1.amazonaws.com/Prod/budget')
+    fetch('https://l1uae3hhuj.execute-api.us-west-1.amazonaws.com/budget')
       .then(response => {
         if (!response.ok) throw new Error('Network response was not ok');
         return response.json();
@@ -25,7 +25,7 @@ function App() {
 
   // ✅ Add new transaction via backend
   const handleAdd = (tx) => {
-    fetch('https://rv96je8k26.execute-api.us-west-1.amazonaws.com/Prod/budget', {
+    fetch('https://l1uae3hhuj.execute-api.us-west-1.amazonaws.com/budget', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -63,7 +63,7 @@ resource "aws_lambda_function" "budget_lambda" {
   filename         = "${path.module}/lambda/handler.zip"
   function_name    = "budgetLambda"
   role             = aws_iam_role.lambda_exec_role.arn
-  handler          = "handler.handler"
+  handler          = "handler.lambda_handler"
   runtime          = "python3.12"
   source_code_hash = filebase64sha256("${path.module}/lambda/handler.zip")
 

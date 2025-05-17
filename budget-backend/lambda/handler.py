@@ -11,7 +11,10 @@ def lambda_handler(event, context):
     print('Received event:', json.dumps(event, indent=2))
 
 
-    method = event.get('httpMethod', '')
+    # method = event.get('httpMethod', '')
+    method = event.get('httpMethod') or event.get('requestContext', {}).get('http', {}).get('method', '')
+
+    print("Detected HTTP method:", method)
     
     if method == 'POST':
         try:
