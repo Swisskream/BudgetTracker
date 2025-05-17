@@ -75,8 +75,14 @@ resource "aws_lambda_function" "budget_lambda" {
 }
 
 resource "aws_apigatewayv2_api" "http_api" {
-  name          = "budget-api"
+  name          = "budget-tracker-api"
   protocol_type = "HTTP"
+
+  cors_configuration {
+    allow_origins = ["*"]
+    allow_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    allow_headers = ["content-type"]
+  }
 }
 
 resource "aws_apigatewayv2_integration" "lambda_integration" {
@@ -111,4 +117,8 @@ resource "aws_lambda_permission" "apigw_lambda" {
   function_name = aws_lambda_function.budget_lambda.function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.http_api.execution_arn}/*/*"
+}
+
+output "api_gateway_url" {
+  value = "${aws_apigatewayv2_api.http_api.api_endpoint}/budget"
 }
