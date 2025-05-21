@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { Amplify } from 'aws-amplify';
+import { Authenticator } from '@aws-amplify/ui-react';
+import '@aws-amplify/ui-react/styles.css';
+
+import awsconfig from './login/aws-exports';
+
 import Header from './components/Header';
 import Summary from './components/Summary';
 import TransactionForm from './components/TransactionForm';
 import TransactionList from './components/TransactionList';
+
+import './stylesheets/app.css';
+
+Amplify.configure(awsconfig);
 
 function App() {
   const [transactions, setTransactions] = useState([]);
@@ -47,13 +57,28 @@ function App() {
     .filter((t) => t && typeof t.amount === 'number' && t.amount < 0)
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
-  return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '1rem' }}>
-      <Header />
-      <Summary income={income} expense={expense} />
-      <TransactionForm onAdd={handleAdd} />
-      <TransactionList transactions={transactions} />
-    </div>
+  // return (
+  //   <div style={{ maxWidth: '600px', margin: '0 auto', padding: '1rem' }}>
+  //     <Header />
+  //     <Summary income={income} expense={expense} />
+  //     <TransactionForm onAdd={handleAdd} />
+  //     <TransactionList transactions={transactions} />
+  //   </div>
+  // );
+
+   return (
+    <Authenticator signUpAttributes={['email']}
+      initialState='signUp'>
+      {({ signOut, user }) => (
+        <div style={{ maxWidth: '600px', margin: '0 auto', padding: '1rem' }}>
+          <button onClick={signOut} style={{ float: 'right' }}>Sign out</button>
+          <Header />
+          <Summary income={income} expense={expense} />
+          <TransactionForm onAdd={handleAdd} />
+          <TransactionList transactions={transactions} />
+        </div>
+      )}
+    </Authenticator>
   );
 }
 
