@@ -10,7 +10,7 @@ import Summary from './components/Summary';
 import TransactionForm from './components/TransactionForm';
 import TransactionList from './components/TransactionList';
 
-import './stylesheets/app.css';
+import styles from './stylesheets/app.module.css';
 
 Amplify.configure(awsconfig);
 
@@ -67,11 +67,12 @@ function App() {
   // );
 
    return (
-    <Authenticator signUpAttributes={['email']}
+    <Authenticator className={styles.authenticator}
+      signUpAttributes={['email']}
       initialState='signUp'>
       {({ signOut, user }) => (
-        <div style={{ maxWidth: '600px', margin: '0 auto', padding: '1rem' }}>
-          <button onClick={signOut} style={{ float: 'right' }}>Sign out</button>
+        <div className={styles.homepage}>
+          <button className={styles.signOut} onClick={signOut} >Sign out</button>
           <Header />
           <Summary income={income} expense={expense} />
           <TransactionForm onAdd={handleAdd} />
