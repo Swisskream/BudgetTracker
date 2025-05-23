@@ -60,12 +60,12 @@ resource "aws_iam_policy_attachment" "lambda_policy" {
 }
 
 resource "aws_lambda_function" "budget_lambda" {
-  filename         = "${path.module}/lambda/handler.zip"
+  filename         = "${path.module}/lambda/lambda.zip"
   function_name    = "budgetLambda"
   role             = aws_iam_role.lambda_exec_role.arn
   handler          = "handler.lambda_handler"
   runtime          = "python3.12"
-  source_code_hash = filebase64sha256("${path.module}/lambda/handler.zip")
+  source_code_hash = filebase64sha256("${path.module}/lambda/lambda.zip")
 
   environment {
     variables = {
@@ -81,7 +81,7 @@ resource "aws_apigatewayv2_api" "http_api" {
   cors_configuration {
     allow_origins = ["*"]
     allow_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-    allow_headers = ["content-type"]
+    allow_headers = ["Content-Type", "Authorization"]
   }
 }
 
@@ -93,16 +93,32 @@ resource "aws_apigatewayv2_integration" "lambda_integration" {
   payload_format_version = "2.0"
 }
 
+resource "aws_apigatewayv2_authorizer" "cognito_auth" {
+  name          = "budget-cognito-authorizer"
+  api_id        = aws_apigatewayv2_api.http_api.id
+  authorizer_type = "JWT"
+  identity_sources = ["$request.header.Authorization"]
+
+  jwt_configuration {
+    audience = [aws_cognito_user_pool_client.budget_user_pool_client.id]
+    issuer = "https://cognito-idp.${var.aws_region}.amazonaws.com/${aws_cognito_user_pool.budget_user_pool.id}"
+  }
+}
+
 resource "aws_apigatewayv2_route" "route" {
   api_id    = aws_apigatewayv2_api.http_api.id
   route_key = "POST /budget"
   target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_auth.id
 }
 
 resource "aws_apigatewayv2_route" "get_route" {
   api_id    = aws_apigatewayv2_api.http_api.id
   route_key = "GET /budget"
   target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_auth.id
 }
 
 resource "aws_apigatewayv2_stage" "default" {
@@ -121,4 +137,20 @@ resource "aws_lambda_permission" "apigw_lambda" {
 
 output "api_gateway_url" {
   value = "${aws_apigatewayv2_api.http_api.api_endpoint}/budget"
+}
+
+resource "aws_cognito_user_pool" "budget_user_pool" {
+  name = "budget-user-pool"
+}
+
+resource "aws_cognito_user_pool_client" "budget_user_pool_client" {
+  name         = "budget-user-pool-client"
+  user_pool_id = aws_cognito_user_pool.budget_user_pool.id
+  generate_secret = false
+  allowed_oauth_flows_user_pool_client = true
+  allowed_oauth_flows = ["code"]
+  allowed_oauth_scopes = ["email", "openid", "profile"]
+  callback_urls = ["http://localhost:3000"] # Change to your frontend
+  logout_urls = ["http://localhost:3000"]
+  supported_identity_providers = ["COGNITO"]
 }
