@@ -25,8 +25,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
+          context: ./jkbudgettracker
+          file: ./jkbudgettracker/Dockerfile
           push: true
           tags: jkinthecloud18/budget-tracker-frontend:latest
 
