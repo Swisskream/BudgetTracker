@@ -1,0 +1,13 @@
+# Ignore dependencies and build artifacts
+node_modules
+build
+dist
+
+# Ignore environment/config files
+.env
+.env.local
+
+# Ignore git and logs
+.git
+.gitignore
+*.log
